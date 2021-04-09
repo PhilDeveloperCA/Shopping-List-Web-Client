@@ -21,3 +21,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+.env
+package_lock.json
+.src/views/Home2.tsx
+src/views/.Home.tsx.swp
