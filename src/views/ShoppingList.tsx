@@ -3,10 +3,12 @@ import {useState, useEffect} from 'react';
 import axios, { AxiosResponse } from 'axios';
 import {useHistory, useLocation, useParams, useRouteMatch} from 'react-router-dom';
 import { AuthContext } from '../auth_context';
+import {Button} from '@material-ui/core';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 
 //Organized List Shopping By Person
 interface ShoppingListInterface {
-    id : number
+    //id : number
     jwt : string,
 }
 
@@ -28,7 +30,7 @@ type Totals = {
     name : string,
 }
 
-const ShoppingList:React.FC<ShoppingListInterface> = ({id, jwt}) => {
+const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
     const [itemName,setItemName] = useState<undefined|string>();
     const [itemDescription, setItemDescription] = useState<undefined|string>();
     const [itemTax, setItemTax] = useState<boolean[]>([]);
@@ -38,6 +40,7 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({id, jwt}) => {
     const [users, setUsers] = useState<string[]>([]);
     const [quantity, setQuantity] = useState<any>();
     const [costTable, setCostTable] = useState<any>(null);
+    const [activeItems, setActiveItems] = useState<boolean[]>([]);
 
     let me = process.env.REACT_APP_API_URL;
 
@@ -45,6 +48,7 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({id, jwt}) => {
     let match = useRouteMatch();
     let location = useLocation();
     const {listid} = useParams<{listid:string|undefined}>();
+    const {id} = useParams<{id:string|undefined}>();
 
     const {state, dispatch} = React.useContext(AuthContext);
 
@@ -95,15 +99,16 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({id, jwt}) => {
         try{
             const response:any = await axios.get(`${me}/items/add/${listid}`, {
                 headers: {
-                    Authorization : jwt
+                    Authorization : state.token,
                 },
                 params : {
                     name,
                     description
                 }
             });
-            const item:Item= response.data;
+            const item:Item= response.data[0];
             setItems([...items,item])
+            console.log(items);
         }
         catch(err){
             console.log(err);
@@ -147,7 +152,8 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({id, jwt}) => {
                         description : itemDescription
                     }
                 })
-                setItems([...items, response.data]);
+                const item:Item= response.data[0];
+                setItems([...items,item])
                 setItemTax([...itemTax, false]);
                 setCosts([...costs, 0]);
                 setQuantity([...quantity, 1]);
@@ -185,8 +191,18 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({id, jwt}) => {
 
     return(
         <React.Fragment>
+              <Button
+                    onClick = {(e) => {e.preventDefault(); history.push(`/group/${id}`)}}
+                    startIcon = {<ArrowBackIcon />}
+                    >
+                        Back to Group 
+                    </Button>
             <div className="grid-container">
-                <div>             
+                <div> 
+                    <button onClick={(e)=> {
+                        e.preventDefault();
+                        history.push(location.pathname+'/compose');
+                    }}> Test Compute Price List  </button>            
                     <label> Tax Rate : </label>
                     <input onChange={e => setTax(parseFloat(e.target.value))}/>
                 </div>

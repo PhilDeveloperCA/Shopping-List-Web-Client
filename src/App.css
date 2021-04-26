@@ -33,9 +33,17 @@
 }
 
 h1{
-    text-align:center;
     color:rgb(211, 29, 211);
     text-underline-position: auto;
+    text-align: center;
+}
+
+h2 {
+    color: plum;
+}
+
+li{
+    color: plum;
 }
 
 form{
@@ -43,7 +51,7 @@ form{
 
 }
 
-body{background-color: #424242;}
+/*body{background-color: #424242;}*/
 
 td{
     padding: 10px;
@@ -76,6 +84,15 @@ div.members{
 
 div.members-active{
     visibility : visible;
+}
+
+tr {
+    color : plum;
+    margin : 5px solid plum;
+}
+
+label {
+    color: plum;
 }
 
 li.members{

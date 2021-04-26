@@ -7,6 +7,7 @@ type AuthType = {
 
 export const initialState = {
     user : JSON.parse(localStorage.getItem('user') as string),
+    //user: 'William',
     token: JSON.parse(localStorage.getItem('token') as string)
 }
 

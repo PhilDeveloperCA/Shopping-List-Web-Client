@@ -3,12 +3,41 @@ import React from 'react';
 import axios from 'axios';
 import { useRouteMatch, useParams, useLocation, useHistory } from 'react-router';
 import { AuthContext } from '../auth_context';
+import Paper from '@material-ui/core/Paper';
+import {Typography, Button, Grid, ButtonGroup, Container, makeStyles, TextField} from '@material-ui/core';
 //Lists of Shopping List in That Group 
+import DetailsIcon from '@material-ui/icons/Details';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+
+const useStyles = makeStyles({
+    shopping_list : {
+        backgroundColor : '#f9f9f9f9',
+        border: 10,
+    },
+    title : {
+        marginTop : 20,
+        marginBottom : 20,
+        align : 'center'
+    },
+    formlabel : {
+        marginBottom: 10,
+        marginTop : 20
+    },
+    btn : {
+        marginLeft : 30
+    },
+    btn2 : {marginTop : 20}
+})
 
 const Group:React.FC = () => {
     const [shoppinglistname, setShoppingListName] = useState<undefined|string>();
     const [shoppingLists, setShoppingLists] = useState<any>();
     const [selectedShoppingList, setShoppingListSelection] = useState<any>();
+    const [listNameError, setListNameError] = useState<null|string>(null);
+    const [users, setUsers] = useState<any>([]);
+    const [nameError, setNameError] = useState<null|string>(null);
+    const classes = useStyles();
 
     const [inviteUsername, setInviteUsername] = useState<string|undefined>();
 
@@ -29,7 +58,9 @@ const Group:React.FC = () => {
 
     const createShoppingList = async (event:any) => {
         event.preventDefault();
-        await axios.get(`${me}/lists/create/${id}`, {
+        console.log(shoppinglistname);
+        if(shoppinglistname === '' || shoppinglistname === null) return setListNameError('Enter a Valid Name');
+        else await axios.get(`${me}/lists/create/${id}`, {
             headers : {
                 Authorization : state.token
             },
@@ -48,25 +79,41 @@ const Group:React.FC = () => {
                     },
                 })
                 setShoppingLists(response.data);
+                const responseUsers = await axios.get(`${me}/group/users/${id}`, {
+                    headers: {
+                        Authorization : state.token
+                    }
+                })
+                setUsers(responseUsers.data);
             }
             else return;
         }
         FetchShoppingLists();
     }, [])
 
-    const addList = async () => {
-        const response = await axios.get(`${me}/lists/create/${id}`,{
-            headers: {
-                Authorization : state.token,
-            },
-            params : {
-                shoppinglistname
-            }
-        })
+    const addList = async (event:any) => {
+        event.preventDefault();
+        console.log(shoppinglistname);
+        if(shoppinglistname === '' || shoppinglistname ===  undefined) return setListNameError('Enter a Valid Name');
+        try{
+            const response = await axios.get(`${me}/lists/create/${id}`,{
+                headers: {
+                    Authorization : state.token,
+                },
+                params : {
+                    name: shoppinglistname
+                }
+            })
+            setShoppingLists([...shoppingLists, response.data[0]]);
+            console.log(shoppingLists);
+        }
+        catch(err){
+            console.log(err);
+        }
     }
 
     const deleteList = async () => {
-        await axios.get(`${me}/lists/${selectedShoppingList}`,{
+        await axios.get(`${me}/lists/delete/${selectedShoppingList}`,{
             headers: {
                 Authorization: state.token
             }
@@ -74,6 +121,7 @@ const Group:React.FC = () => {
     }
 
     const inviteUser = async () => {
+        if(inviteUsername === undefined || inviteUsername === null || inviteUsername === '') return setNameError('Enter a Valid Username')
         axios.get(`${me}/group/invite/send/${id}`,{
             params : {
                 username : inviteUsername,
@@ -83,37 +131,101 @@ const Group:React.FC = () => {
             }
         })
         .then(response => console.log(response))
-        .catch(err => console.log(err));
+        .catch(err => {
+            console.log(err);
+            setNameError('User Does Not Exist, Enter a Valid Name');
+        });
     }
  
     const ShoppingListRows = shoppingLists?.map((list:any,index:number) => {
         return(
-            <div className="Shopping-List-Div">
-                <h2> {list.name} {selectedShoppingList === list.id? '- SELECTED' : ''} </h2>
-                <button onClick={(event) => {event.preventDefault(); setShoppingListSelection(list.id)}}>  Select List </button>
-                <button onClick = {() => history.push(`/group/${id}/shoppinglist/${list.id}`) }> Visit Shopping List </button>
-            </div>
+            <Grid item className={classes.shopping_list} xs={12} sm={6} lg={4}>
+                <Container>
+                    <Typography variant="h4" color = "primary" className = {classes.title}>
+                        {list.name} {selectedShoppingList === list.id? '-' : ''}
+                    </Typography>
+                    <Button
+                        variant = "contained"
+                        color = "secondary"
+                        startIcon = {<DetailsIcon />}
+                        onClick = {(event) => {event.preventDefault(); setShoppingListSelection(list.id)}}>
+                        See List Details 
+                    </Button>
+                    <Button
+                        className = {classes.btn}
+                        variant = "contained"
+                        color = "secondary"
+                        startIcon = {<ShoppingCartIcon />}
+                        onClick =  {() => history.push(`/group/${id}/shoppinglist/${list.id}`) }>
+                        Visit Shopping List Page 
+                    </Button>
+                </Container>
+            </Grid>
         );
     })
 
     return (
-    <div>
-        <h1> Group Shopping List </h1>
-        {ShoppingListRows}
-
-        <div>
-                <h1> Create Shopping List </h1>
-                <form>
-                    <label htmlFor = "list"> Add Shopping List : </label>
-                    <input className="class" onChange={(event) => {handleShoppinglistNameChange(event.target.value)}}/>
-                    <button onClick={createShoppingList}> Add List : </button>
-                </form>
-                <h1> Invite Users </h1>
-                <label htmlFor="inviteusername"></label>
-                <input id="inviteusername" onChange={(e)=>setInviteUsername(e.target.value)}/>
-                <button onClick={(event) => {event.preventDefault(); inviteUser()}}/>
-            </div>
-    </div>
+        <Grid container>
+              <Grid item xl ={12} xs={12}>
+                    <Button
+                    onClick = {(e) => {e.preventDefault(); history.push('/')}}
+                    startIcon = {<ArrowBackIcon />}
+                    className = {classes.btn2}
+                    >
+                        Back to Group 
+                    </Button>
+                </Grid>
+            <Grid item sm={12} md={6}>
+                <Container>
+                    <Typography variant="h5" align="left" className ={classes.formlabel}>
+                        Invite Users To Group : 
+                    </Typography>
+                    <TextField 
+                        label = "Username :  "
+                        variant = "outlined"
+                        color = "primary"
+                        required
+                        error = {nameError!= null? true:false}
+                        helperText={nameError}
+                        onChange={(e)=>setInviteUsername(e.target.value)}/>
+                    <Button onClick={(event) => {event.preventDefault(); inviteUser()}} color = "primary">
+                        Invite User 
+                    </Button>
+                </Container>
+            </Grid>
+            <Grid item sm={12} md={6} justify='center'>
+                <Typography variant="h5" align="left" className = {classes.formlabel}>
+                        Create Shopping List : 
+                </Typography>
+                <TextField 
+                    label = "Enter A List Name "
+                    variant = "outlined"
+                    color = "primary"
+                    required
+                    error = {listNameError!= null? true:false}
+                    helperText={listNameError}
+                    onChange={(event) => {handleShoppinglistNameChange(event.target.value)}}
+                />
+                <Button
+                    onClick={addList}
+                    color = "primary"
+                    size="small"
+                >
+                    Submit List 
+                </Button> 
+            </Grid>
+            <Grid item xs={12} lg = {12}>
+                <Typography
+                    variant = "h3"
+                    color = "primary"
+                    align = "center"
+                    className = {classes.title}
+                >   
+                    Groups Shopping Lists: 
+                </Typography>
+            </Grid>
+            {ShoppingListRows}
+        </Grid>
     );
 }
 

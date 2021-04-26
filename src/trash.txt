@@ -1,0 +1,75 @@
+            <div className="Group_List">
+                <h2> {group.name}{selectedGroup===group.id?'- SELECTED':''}</h2>
+                <button onClick = {() => handleGroupSelection(group.id)}> Select Group </button>
+                {state.user ===group.admin? <button onClick = {(event) => {deleteGroup(event,group.id)}}> Delete Group </button>:null}
+                <Button variant="contained" color="primary" onClick= {() => history.push(`/group/${group.id}`)}> Visit Group Page </Button>
+
+
+                    <div>
+                        <Typography 
+                        variant="h1"
+                        color = "primary"
+                        align = "center"
+                        >
+                        Your Groups 
+                        </Typography>
+                        <h1> Your Groups </h1>
+                        <div className="nested">
+                            {GroupList}
+                        </div>
+                    </div>
+
+
+            <ButtonGroup color="secondary" variant="contained">
+                <Button
+                //endIcon and startIcon why isn't it working
+                endIcon={<GroupIcon />}
+                startIcon ={<GroupIcon />}
+                >
+                
+                </Button>
+                <Button
+                className={classes.btn}>
+                    Test Button
+                </Button>
+                <Button></Button>
+            </ButtonGroup>
+
+            <h1> {login?'Login Page':'Sign-Up Page'} </h1>
+            <Button color="primary" variant="contained" onClick= {(e) => {e.preventDefault(); setLogin(false)}} disabled={!login}> New User? Sign Up </Button>
+            <Button size="large" color="primary" variant="contained" onClick= {(e) => {e.preventDefault(); setLogin(true)}} disabled={login}> Returning ? Sign in </Button>
+
+
+            <form>
+                <label> Username : </label>
+                <input onChange ={(e) => {setUsername(e.target.value)}}/>
+                <label> Password: </label>
+                <input onChange ={(e) => {setPassword(e.target.value)}}/>
+                <button onClick = {SubmitAuth}> {login? 'Login': 'Sign-Up'}</button>
+            </form>
+
+           <form>
+                    <label htmlFor= "group"> New Group : </label>
+                    <input className="group name" id="group" onChange={handleGroupnameChange}/>
+                    <button onClick={SubmitGroup}> Submit Group: </button>
+                </form>
+
+                                <h2> {list.name} {selectedShoppingList === list.id? '-' : ''} </h2>
+                <button onClick={(event) => {event.preventDefault(); setShoppingListSelection(list.id)}}>  Select List </button>
+                <button onClick = {() => history.push(`/group/${id}/shoppinglist/${list.id}`) }> Visit Shopping List </button>
+            </div>
+
+                            <h1> Create Shopping List </h1>
+                <form>
+                    <label htmlFor = "list"> Add Shopping List : </label>
+                    <input className="class" onChange={(event) => {handleShoppinglistNameChange(event.target.value)}}/>
+                    <button onClick={addList}> Add List : </button>
+                </form>
+
+                        <div>
+                <h1> Invite Users </h1>
+                <label htmlFor="inviteusername"></label>
+                <input id="inviteusername" onChange={(e)=>setInviteUsername(e.target.value)}/>
+                <button onClick={(event) => {event.preventDefault(); inviteUser()}}/>
+            </div>
+    </div>
