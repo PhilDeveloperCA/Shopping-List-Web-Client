@@ -5,9 +5,10 @@ import {useHistory, useLocation, useParams, useRouteMatch} from 'react-router-do
 import { AuthContext } from '../auth_context';
 import {Button} from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack'
+import {Grid, Typography, makeStyles, Table, TableBody, TableContainer, TableHead, TableRow, TableCell, TablePagination, TableSortLabel, Toolbar, Checkbox, TextField} from '@material-ui/core';
 
 //Organized List Shopping By Person
-interface ShoppingListInterface {
+type ShoppingListInterface = {
     //id : number
     jwt : string,
 }
@@ -30,9 +31,19 @@ type Totals = {
     name : string,
 }
 
+const useStyle = makeStyles({
+    heading : {
+        marginTop : 20,
+        marginBottom : 20,
+        align : 'center'
+    }
+})
+
 const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
     const [itemName,setItemName] = useState<undefined|string>();
+    const [nameError, setNameError] = useState<string|null>(null);
     const [itemDescription, setItemDescription] = useState<undefined|string>();
+    const [descriptionError, setDescriptionError] = useState<string|null>(null);
     const [itemTax, setItemTax] = useState<boolean[]>([]);
     const [tax, setTax] = useState<number>(0);
     const [items, setItems] = useState<Item[]>([]);
@@ -42,6 +53,7 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
     const [costTable, setCostTable] = useState<any>(null);
     const [activeItems, setActiveItems] = useState<boolean[]>([]);
 
+    const classes = useStyle();
     let me = process.env.REACT_APP_API_URL;
 
     let history = useHistory();
@@ -96,6 +108,8 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
     }
 
     const createItem = async (name:string, description:string) => {
+        if(itemName === null || itemName ==='' || itemName === undefined) return setNameError('Enter a Valid Name ')
+        if(itemDescription === null || itemDescription || '' || itemDescription === undefined) return setItemDescription('Enter a Valid Description')
         try{
             const response:any = await axios.get(`${me}/items/add/${listid}`, {
                 headers: {
@@ -127,17 +141,6 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
         })
     }
 
-    const ItemDisplay = items?.map((item, index) => {
-        return (
-            <tr> 
-                <td> {item.username} </td>
-                <td> {item.name} </td>
-                <td> Quantity:  <input step="1" size={4} onBlur={(event) => handleChangeQuantity(event,index)}/></td>
-                <td> Cost : <input step=".01" size={6} onBlur={(event) => handleChangeCost(event,index)}/> </td>
-                <td><input type="checkbox"  onClick= {(e)=> handleTaxQuantity(index)}/></td>
-            </tr>
-        );
-    });
 
     const SubmitItem = async (event:any) => {
         event.preventDefault();
@@ -166,6 +169,11 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
         return;
     }
 
+    const headCells = [
+        {id : 'creator', numeric: false, disablePadding:false, label:'Creator'},
+        {id : 'name', numeric : false, disablePadding : false, label : 'Product Name'}
+    ]
+
     const CalculateCosts = (name:string) => {
         var total_price = 0.00;
         for(var i=0; i<items.length;i++){
@@ -184,66 +192,136 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
         setCostTable(new_costs);
     }
 
-    const costsTableJSX = costTable?.map((element:any,index:number) => {
-        return <li> {element.user} : {element.price} </li>
-    })
+    //const costsTableJSX = costTable?.map((element:any,index:number) => {
+        //return <li> {element.user} : {element.price} </li>
+    const costsTableJSX = () => {
+        if(!costTable) return null;
+        return (
+            <TableContainer>
+                <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell> User : </TableCell>
+                            <TableCell align="left"> Cost : </TableCell>
+                        </TableRow>
+                    </TableHead>
+                        <TableBody>
+                            {costTable.map((element:any, index: number) => {
+                                return (<TableRow key={element.user} component="th" scope="row">
+                                    <TableCell> {element.user} </TableCell>
+                                    <TableCell align="right"> {element.price || 0.00} </TableCell>
+                                </TableRow>);
+                            })}
+                        </TableBody>
+                </Table>
+            </TableContainer>
+        );
+    }
     
 
     return(
         <React.Fragment>
-              <Button
-                    onClick = {(e) => {e.preventDefault(); history.push(`/group/${id}`)}}
-                    startIcon = {<ArrowBackIcon />}
-                    >
-                        Back to Group 
-                    </Button>
-            <div className="grid-container">
-                <div> 
-                    <button onClick={(e)=> {
-                        e.preventDefault();
-                        history.push(location.pathname+'/compose');
-                    }}> Test Compute Price List  </button>            
-                    <label> Tax Rate : </label>
-                    <input onChange={e => setTax(parseFloat(e.target.value))}/>
-                </div>
-                <div>
-                    <h1> Add Items : </h1>
-                    <form> 
-                        <label htmlFor = "itemname"> Item Name  : </label>
-                        <input className="item" id="itemname" onBlur= {(e)=> setItemName(e.target.value)}/>
-                        <label htmlFor = "itemdescription"> Item Description : </label>
-                        <input id="itemdescription" className ="itemdescription" onBlur = {(e => setItemDescription(e.target.value))}/>
-                        <button onClick = {SubmitItem}> Submit </button>
+        <Grid container>
+            <Grid item xl ={12} xs={12}>
+                <Button
+                onClick = {(e) => {e.preventDefault(); history.push(`/group/${id}`)}}
+                startIcon = {<ArrowBackIcon />}
+                >
+                    Back to Group 
+                </Button>
+            </Grid>
+            <Grid item xs={4} lg = {4}>
+                <form noValidate autoComplete="off">
+                        <TextField 
+                        label = "Tax Rate (%)"
+                        onChange={e => setTax(parseFloat(e.target.value))}
+                        required
+                        color = "primary"
+                        variant = "outlined"
+                        />
                     </form>
-                </div>
-                <h1> Shopping List </h1>
-                <div>
-                    <div>
-                        <form></form>
-                    </div>
-                    <button onClick={generateCostsTable}> Calculate Costs </button>
-                    {costTable?costsTableJSX:null}
-                </div>
-            </div>
-            <div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th> Creator </th>
-                            <th> Name </th>
-                            <th> Quantity </th>
-                            <th> Price/Unit </th>
-                            <th> Apply Tax </th>
-                        </tr>
-                    </thead>
-                    {ItemDisplay}
-                </table>
-            </div>
+                    <Button
+                        onClick={generateCostsTable}
+                        variant ="outlined"
+                        color = "secondary">
+                            Compute Price Table : 
+                    </Button>
+            </Grid>
+            <Grid item xs={2} xl = {2}></Grid>
+            <Grid item xs = {4} xl = {4}>
+                {costTable?costsTableJSX():null}
+            </Grid>
+            <Grid item xs={2} xl = {2}></Grid>
+            <Grid item xs={12} lg={8}>
+                <Typography
+                    variant = "h5"
+                >
+                    Add Items : 
+                </Typography>
+                <form noValidate autoComplete="off">
+                    <TextField 
+                    label = "Item Name "
+                    onBlur= {(e)=> setItemName(e.target.value)}
+                    variant = "outlined"
+                    color = "primary"
+                    required
+                    error = {nameError === null?false:true}
+                    helperText = {nameError}
+                    />
+                    <TextField                     
+                    label = "Item Description"
+                    onBlur= {(e)=> setItemDescription(e.target.value)}
+                    variant = "outlined"
+                    color = "primary"
+                    required
+                    error = {descriptionError === null?false:true}
+                    helperText = {descriptionError}
+                    />
+                </form>
+                <Button
+                    onClick = {SubmitItem}
+                    variant = "outlined"
+                    color = "secondary"
+                    >
+                        Submit 
+                    </Button>
+                <Typography
+                className = {classes.heading}
+                align = 'center'
+                variant = "h3"
+                color = "secondary">
+                    Shopping List 
+                </Typography>
+                <TableContainer>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align="right"> Creator : </TableCell>
+                                <TableCell align="right"> Item Name :  </TableCell>
+                                <TableCell align="right"> Quantity </TableCell>
+                                <TableCell align="right"> Price/Unit : </TableCell>
+                                <TableCell align="right"> Apply Tax ? :</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {items?.map((item,index) => {
+                                return (
+                                <TableRow key={item.id}>
+                                    <TableCell component = "th" scope = "row"> {item.username} </TableCell>
+                                    <TableCell align="right"> {item.name} </TableCell>
+                                    <TableCell align="right"> <input step="1" size={4} onBlur={(event) => handleChangeQuantity(event,index)}/> </TableCell>
+                                    <TableCell align="right"> <input step=".01" size={6} onBlur={(event) => handleChangeCost(event,index)}/>  </TableCell>
+                                    <TableCell align="right"> <input type="checkbox"  onClick= {(e)=> handleTaxQuantity(index)}/> </TableCell>
+                                </TableRow> );
+                            })}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                </Grid>
+            </Grid>
         </React.Fragment>
     );
 }
-
-//Form Where you Can Add Items (sidebar)
 
 
 

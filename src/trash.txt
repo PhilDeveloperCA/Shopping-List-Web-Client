@@ -73,3 +73,58 @@
                 <button onClick={(event) => {event.preventDefault(); inviteUser()}}/>
             </div>
     </div>
+
+                    <table>
+                    <thead>
+                        <tr>
+                            <th> Creator </th>
+                            <th> Name </th>
+                            <th> Quantity </th>
+                            <th> Price/Unit </th>
+                            <th> Apply Tax </th>
+                        </tr>
+                    </thead>
+                    {ItemDisplay}
+                </table>
+
+                    const ItemDisplay = items?.map((item, index) => {
+        return (
+            <tr> 
+                <td> {item.username} </td>
+                <td> {item.name} </td>
+                <td> Quantity:  <input step="1" size={4} onBlur={(event) => handleChangeQuantity(event,index)}/></td>
+                <td> Cost : <input step=".01" size={6} onBlur={(event) => handleChangeCost(event,index)}/> </td>
+                <td><input type="checkbox"  onClick= {(e)=> handleTaxQuantity(index)}/></td>
+            </tr>
+        );
+    });
+
+                    <div>
+                    <h1> Add Items : </h1>
+                    <form> 
+                        <label htmlFor = "itemname"> Item Name  : </label>
+                        <input className="item" id="itemname" onBlur= {(e)=> setItemName(e.target.value)}/>
+                        <label htmlFor = "itemdescription"> Item Description : </label>
+                        <input id="itemdescription" className ="itemdescription" onBlur = {(e => setItemDescription(e.target.value))}/>
+                        <button onClick = {SubmitItem}> Submit </button>
+                    </form>
+                </div>
+                <h1> Shopping List </h1>
+
+                    <div> 
+                    <button onClick={(e)=> {
+                        e.preventDefault();
+                        history.push(location.pathname+'/compose');
+                    }}> Test Compute Price List  </button>            
+                    <label> Tax Rate : </label>
+                    <input onChange={e => setTax(parseFloat(e.target.value))}/>
+                </div>
+                <div>
+                    <div>
+                        <form></form>
+                    </div>
+                    <button onClick={generateCostsTable}> Calculate Costs </button>
+                    {costTable?costsTableJSX:null}
+                </div>
+            </div>
+            <div>
