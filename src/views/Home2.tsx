@@ -113,6 +113,7 @@ const Home:React.FC = () => {
 
     const SubmitGroup = async (event:any) => {
         event.preventDefault();
+        if(groupname === undefined || groupname === '' || groupname === null) return setGroupnameError('Enter a Valid Group Name');
         axios.get(`${api_url}/group/create`, {
             params: {
                 name : groupname
@@ -268,9 +269,11 @@ const Home:React.FC = () => {
     const InviteList:any = invites?.map((invite:any, index:number) => {
         return(
             <div>
-                <h3>{invite.id}</h3>
-                <button onClick={(event) => acceptInvite(event, invite.group_id)}> Accept Invite </button>
-                <button onClick={(event) => acceptInvite(event, invite.group_id)}> Decline Invite </button>
+                <Container key ={invite.id}>
+                    <Typography variant = "h6" align="center" color="primary"> {invite.name}</Typography>
+                    <Button onClick={(event) => acceptInvite(event, invite.group_id)} variant = "contained" color = "primary"> Accept Invite </Button>
+                    <Button onClick={(event) => acceptInvite(event, invite.group_id)} variant = "contained" color = "secondary"> Decline Invitation : </Button>
+                </Container>
             </div>
         );
     })
@@ -347,25 +350,7 @@ const Home:React.FC = () => {
         return (
             <React.Fragment>
                 <Grid container>
-                    <Grid item lg={12} xs={12}>
-                        <Typography
-                            variant = "h3"
-                            color = "secondary"
-                            align = "center"
-                            >
-                                Your Groups 
-                    </Typography>
-                    </Grid>
-                        {GroupList}
-                </Grid>
-                <div className="grid-container">
-                    <div>
-                        <h1> Invites : </h1>
-                        <div> 
-                            {InviteList} 
-                        </div>
-                    </div>
-                    <div>
+                    <Grid item md ={6} xs={12}>
                         <Typography
                             variant = "h4"
                             color = "secondary"
@@ -380,13 +365,40 @@ const Home:React.FC = () => {
                             variant = "outlined"
                             color = "secondary"
                             required
+                            onChange = {(e) => setGroupName(e.target.value)}
                             error = {true?false:true}
-                            helperText={true?null:'Enter Longer Password'}
-                            fullWidth
+                            helperText={true?null:'Enter Valid Group Name'}
                             />
+                            <Button
+                                variant = "outlined"
+                                color = "secondary"
+                                onClick = {SubmitGroup}
+                            >
+                                Submit :
+                            </Button>
                         </form>
-                    </div>
-            </div>
+                    </Grid>
+                    <Grid item md = {6} xs = {12} alignContent='center' alignItems='center' justify='center'>
+                        <Typography
+                            variant = "h5"
+                            color = "secondary"
+                            align = "center"
+                        >
+                            Invites : 
+                        </Typography>
+                        {InviteList}
+                    </Grid>
+                    <Grid item lg={12} xs={12}>
+                        <Typography
+                            variant = "h3"
+                            color = "secondary"
+                            align = "center"
+                            >
+                                Your Groups 
+                    </Typography>
+                    </Grid>
+                        {GroupList}
+                </Grid>
             </React.Fragment>
         );
     }

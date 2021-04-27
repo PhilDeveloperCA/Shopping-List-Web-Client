@@ -4,11 +4,13 @@ import axios from 'axios';
 import { useRouteMatch, useParams, useLocation, useHistory } from 'react-router';
 import { AuthContext } from '../auth_context';
 import Paper from '@material-ui/core/Paper';
-import {Typography, Button, Grid, ButtonGroup, Container, makeStyles, TextField} from '@material-ui/core';
+import {Typography, Button, Grid, ButtonGroup, Container, makeStyles, TextField, IconButton} from '@material-ui/core';
 //Lists of Shopping List in That Group 
 import DetailsIcon from '@material-ui/icons/Details';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import DeleteIcon from '@material-ui/icons/Delete';
+import {red} from '@material-ui/core/colors';
 
 const useStyles = makeStyles({
     shopping_list : {
@@ -112,12 +114,13 @@ const Group:React.FC = () => {
         }
     }
 
-    const deleteList = async () => {
-        await axios.get(`${me}/lists/delete/${selectedShoppingList}`,{
+    const deleteList = async (index:number, shoppingListId:number) => {
+        await axios.get(`${me}/lists/delete/${shoppingListId}`,{
             headers: {
                 Authorization: state.token
             }
         });
+        setShoppingLists([...shoppingLists.slice(0,index),...shoppingLists.slice(index+1)]);
     }
 
     const inviteUser = async () => {
@@ -159,6 +162,10 @@ const Group:React.FC = () => {
                         onClick =  {() => history.push(`/group/${id}/shoppinglist/${list.id}`) }>
                         Visit Shopping List Page 
                     </Button>
+                    <IconButton 
+                        color= "inherit"
+                        onClick = {(e) => {e.preventDefault(); deleteList(index, list.id)}}
+                    > <DeleteIcon /> </IconButton>
                 </Container>
             </Grid>
         );

@@ -128,3 +128,12 @@
                 </div>
             </div>
             <div>
+
+                            <div className="grid-container">
+                    <div>
+                        <h1> Invites : </h1>
+                        <div> 
+                            {InviteList} 
+                        </div>
+                    </div>
+            </div>

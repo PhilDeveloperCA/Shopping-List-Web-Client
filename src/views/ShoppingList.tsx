@@ -5,7 +5,7 @@ import {useHistory, useLocation, useParams, useRouteMatch} from 'react-router-do
 import { AuthContext } from '../auth_context';
 import {Button} from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack'
-import {Grid, Typography, makeStyles, Table, TableBody, TableContainer, TableHead, TableRow, TableCell, TablePagination, TableSortLabel, Toolbar, Checkbox, TextField} from '@material-ui/core';
+import {Grid, Container, Typography, makeStyles, Table, TableBody, TableContainer, TableHead, TableRow, TableCell, TablePagination, TableSortLabel, Toolbar, Checkbox, TextField} from '@material-ui/core';
 
 //Organized List Shopping By Person
 type ShoppingListInterface = {
@@ -52,6 +52,9 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
     const [quantity, setQuantity] = useState<any>();
     const [costTable, setCostTable] = useState<any>(null);
     const [activeItems, setActiveItems] = useState<boolean[]>([]);
+    const [category1, setCategory1] = useState<string|null>(null);
+    const [category2, setCategory2] = useState<string|null>(null);
+    const [categoryError, setCategoryError] = useState<string|null>(null);
 
     const classes = useStyle();
     let me = process.env.REACT_APP_API_URL;
@@ -107,7 +110,9 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
             setItemTax([...itemTax.slice(0,index),!currentValue,...itemTax.slice(index+1)])
     }
 
-    const createItem = async (name:string, description:string) => {
+    /*const createItem = async (name:string, description:string) => {
+        if(category1 && category1 === category2) return setCategoryError('Enter Different or Only 1 Category');
+        console.log(category1);
         if(itemName === null || itemName ==='' || itemName === undefined) return setNameError('Enter a Valid Name ')
         if(itemDescription === null || itemDescription || '' || itemDescription === undefined) return setItemDescription('Enter a Valid Description')
         try{
@@ -117,7 +122,9 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
                 },
                 params : {
                     name,
-                    description
+                    description,
+                    category1,
+                    category2,
                 }
             });
             const item:Item= response.data[0];
@@ -128,7 +135,7 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
             console.log(err);
         }
         //do something with Redux or local state here???
-    }
+    }*/
 
     const deleteItem = async (id :number) => {
         const item = await axios.get(`${me}/lists/deleteItem/${listid}`, {
@@ -144,6 +151,11 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
 
     const SubmitItem = async (event:any) => {
         event.preventDefault();
+        console.log(category1);
+        console.log(category2);
+        if(category1!=null && category1 === category2) return setCategoryError('Enter Different or Only 1 Category');
+        if(itemName === null || itemName ==='' || itemName === undefined) return setNameError('Enter a Valid Name ')
+        if(itemDescription === null || itemDescription === '' || itemDescription === undefined) return setItemDescription('Enter a Valid Description')
         if(itemName&&itemDescription){
             try{
                 const response = await axios.get(`${me}/items/add/${listid}`, {
@@ -152,7 +164,9 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
                     },
                     params: {
                         name : itemName,
-                        description : itemDescription
+                        description : itemDescription,
+                        category1 : category1,
+                        category2 : category2,           
                     }
                 })
                 const item:Item= response.data[0];
@@ -253,6 +267,7 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
             </Grid>
             <Grid item xs={2} xl = {2}></Grid>
             <Grid item xs={12} lg={8}>
+                <Container>
                 <Typography
                     variant = "h5"
                 >
@@ -273,9 +288,36 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
                     onBlur= {(e)=> setItemDescription(e.target.value)}
                     variant = "outlined"
                     color = "primary"
+                    multiline
+                    fullWidth
+                    rows = {4}
                     required
                     error = {descriptionError === null?false:true}
                     helperText = {descriptionError}
+                    />
+                </form>
+                <form autoComplete="off" noValidate>
+                <TextField                     
+                    label = "1st Category"
+                    onBlur= {(e) => {
+                        if(e.target.value != undefined){
+                            setCategory1(e.target.value);
+                        }
+                    }}
+                    variant = "outlined"
+                    color = "secondary"
+                    />
+                    <TextField                     
+                    label = "2nd Category "
+                    onBlur= {(e) => {
+                        if(e.target.value != undefined){
+                            setCategory2(e.target.value);
+                        }
+                    }}
+                    variant = "outlined"
+                    color = "secondary"
+                    error = {categoryError === null?false:true}
+                    helperText = {categoryError}
                     />
                 </form>
                 <Button
@@ -317,6 +359,7 @@ const ShoppingList:React.FC<ShoppingListInterface> = ({jwt}) => {
                         </TableBody>
                     </Table>
                 </TableContainer>
+                </Container>
                 </Grid>
             </Grid>
         </React.Fragment>
