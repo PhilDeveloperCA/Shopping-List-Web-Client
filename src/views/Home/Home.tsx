@@ -1,7 +1,7 @@
 import React from 'react';
 import {useState, useEffect, createContext} from 'react';
 import axios from 'axios';
-import {AuthContext} from '../auth_context';
+import {AuthContext} from '../../auth_context';
 import {useHistory} from 'react-router-dom';
 //import Button from '@material-ui/core/Button';
 //import Grid from '@material-ui/core/Grid';
@@ -10,7 +10,7 @@ import DetailsIcon from '@material-ui/icons/Details';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Box from '@material-ui/core/Box';
 
-import {Typography, Button, Grid, ButtonGroup, Container, makeStyles, TextField} from '@material-ui/core';
+import {Typography, Button, Grid, ButtonGroup, Container, makeStyles, TextField, Card, Paper, CardContent, CardActions} from '@material-ui/core';
 
 const useStyles = makeStyles({
     btn : {
@@ -52,7 +52,6 @@ const Home:React.FC = () => {
     const [groups, setGroups] = useState<any>([]);
     const [selectedGroup, setSelectedGroup] = useState<undefined|number>();
     const [groupNameError, setGroupnameError] = useState<string|null>(null);
-    const [inviteuser, setInviteUser] = useState<undefined|string>();
     const [invites, setInvites] = useState<any>();
     
     const [username, setUsername] = useState<string>('');
@@ -66,6 +65,14 @@ const Home:React.FC = () => {
     const {state, dispatch} = React.useContext(AuthContext);
     const history = useHistory();
 
+    const instance = axios.create({
+        baseURL : process.env.REACT_APP_API_URL,
+        timeout : 1000,
+        headers : {
+            'Authorization' : state.token,
+        }
+    })
+
     let api_url = process.env.REACT_APP_API_URL;
 
     const handleGroupnameChange = (event:React.ChangeEvent<HTMLInputElement>) => {
@@ -74,31 +81,19 @@ const Home:React.FC = () => {
 
     useEffect(() => {
         const FetchGroups = async () => {
-            axios.get(`${api_url}/group/group/mygroups`, {
-                headers: {
-                    Authorization : state.token
-                },
-            })
-            .then(response => setGroups(response.data))
-            .catch(err => console.log(err));
+            instance.get('/app/group')
+                .then(response => {
+                    setGroups(response.data);
+                })
+                .catch(err => {
+                    console.log(err);
+                    /*dispatch({
+                        type: 'logout'
+                    })*/
+                })
         }
         if(state.token) FetchGroups();
-        else return;
-    }, [state.token]);
-
-    useEffect(() => {
-        const FetchInvites = async () => {
-            axios.get(`${api_url}/group/invite/getmyinvites`, {
-                headers: {
-                    Authorization : state.token
-                },
-            })
-            .then(response => setInvites(response.data))
-            .catch(err => console.log(err));
-        }
-        if(state.token) FetchInvites();
-        else return;
-    }, [state.token]);
+    },[state.token]);
 
     const getUsers = async (id:number) => {
         const group = groups.find((element:any) => element.id === id);
@@ -114,15 +109,9 @@ const Home:React.FC = () => {
     const SubmitGroup = async (event:any) => {
         event.preventDefault();
         if(groupname === undefined || groupname === '' || groupname === null) return setGroupnameError('Enter a Valid Group Name');
-        axios.get(`${api_url}/group/create`, {
-            params: {
-                name : groupname
-            },
-            headers : {
-                Authorization : state.token
-            }
-        }, 
-        )
+        instance.post('/app/group', {
+            name: groupname,
+        })
         .then(response => setGroups([...groups, response.data[0]]))
         .catch(err => console.log(err));
     }
@@ -193,13 +182,16 @@ const Home:React.FC = () => {
 
     const deleteGroup = (event:any, groupid:number) => {
         event.preventDefault();
-        axios.get(`${api_url}/group/delete/${groupid}`, {
+        /*axios.get(`${api_url}/group/delete/${groupid}`, {
             headers : {
                 Authorization : state.token, 
             }
-        })
-        .then(response => console.log(response))
-        .catch(err => console.log(err));
+        })*/
+        instance.delete(`app/group/${groupid}`)
+            .then(response => {
+                console.log(response);
+            })
+            .catch(err => console.log(err));
     }
 
     const acceptInvite = (event:any,id:number) => {
@@ -221,6 +213,42 @@ const Home:React.FC = () => {
     }
 
     const GroupList:any = groups?.map((group:any,index:any) => {
+        if(true){
+            return(
+                <Grid item sm={9} md={6} lg={4} >
+                    <Card>
+                        <CardContent>
+                            <Typography> {group.name} </Typography>
+                        </CardContent>
+                        <CardActions>
+                            <ButtonGroup
+                            color = "primary"
+                            variant = "contained"
+                             >
+                                <Button 
+                                    startIcon = {<DetailsIcon/>}
+                                    onClick = {() => handleGroupSelection(group.id)}
+                                >
+                                    See Group Details 
+                                </Button>
+                                <Button
+                                    endIcon = {<DeleteIcon />}
+                                    onClick = {(e) => {deleteGroup(e, group.id)}}
+                                >
+                                    Delete Group 
+                                </Button>
+                                <Button
+                                    endIcon = {<GroupIcon />}
+                                    onClick= {() => history.push(`/group/${group.id}`)}
+                                >
+                                    Visit Group Page
+                                </Button>  
+                            </ButtonGroup>
+                        </CardActions>
+                    </Card>
+                </Grid>
+            );
+        }
         return(
         <Grid item sm={9} md={6} lg={4} className = {classes.Group_List}>
                 <Box className={classes.Group_List} m={2} pt={3}>
@@ -243,7 +271,7 @@ const Home:React.FC = () => {
                         </Button>
                         <Button
                             endIcon = {<DeleteIcon />}
-                            onClick = {() => handleGroupSelection(group.id)}
+                            onClick = {(e) => {deleteGroup(e, group.id)}}
                         >
                             Delete Group 
                         </Button>
@@ -263,18 +291,6 @@ const Home:React.FC = () => {
                 
             </div> 
         </Grid>
-        );
-    })
-
-    const InviteList:any = invites?.map((invite:any, index:number) => {
-        return(
-            <div>
-                <Container key ={invite.id}>
-                    <Typography variant = "h6" align="center" color="primary"> {invite.name}</Typography>
-                    <Button onClick={(event) => acceptInvite(event, invite.group_id)} variant = "contained" color = "primary"> Accept Invite </Button>
-                    <Button onClick={(event) => acceptInvite(event, invite.group_id)} variant = "contained" color = "secondary"> Decline Invitation : </Button>
-                </Container>
-            </div>
         );
     })
 
@@ -386,7 +402,6 @@ const Home:React.FC = () => {
                         >
                             Invites : 
                         </Typography>
-                        {InviteList}
                     </Grid>
                     <Grid item lg={12} xs={12}>
                         <Typography

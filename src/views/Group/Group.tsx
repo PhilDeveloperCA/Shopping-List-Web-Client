@@ -2,9 +2,9 @@ import {useEffect, useState} from 'react';
 import React from 'react';
 import axios from 'axios';
 import { useRouteMatch, useParams, useLocation, useHistory } from 'react-router';
-import { AuthContext } from '../auth_context';
+import { AuthContext } from '../../auth_context';
 import Paper from '@material-ui/core/Paper';
-import {Typography, Button, Grid, ButtonGroup, Container, makeStyles, TextField, IconButton} from '@material-ui/core';
+import {Typography, Button, Grid, ButtonGroup, Container, makeStyles, TextField, IconButton,Card,CardContent, CardActions, Modal} from '@material-ui/core';
 //Lists of Shopping List in That Group 
 import DetailsIcon from '@material-ui/icons/Details';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
@@ -40,6 +40,7 @@ const Group:React.FC = () => {
     const [users, setUsers] = useState<any>([]);
     const [nameError, setNameError] = useState<null|string>(null);
     const classes = useStyles();
+    const [showModal, setModal] = useState<boolean>(false);
 
     const [inviteUsername, setInviteUsername] = useState<string|undefined>();
 
@@ -139,40 +140,70 @@ const Group:React.FC = () => {
             setNameError('User Does Not Exist, Enter a Valid Name');
         });
     }
+
+    const modal =  (
+        shoppingLists&&selectedShoppingList?<Modal open={showModal} onClose={() => {}} aria-labelledby='simple-modal-title' aria-describedby = 'simple-modal-description' style={{display : 'flex', alignItems : 'center', justifyContent:'center'}}> 
+            {<Container>
+                <Card>
+                    <CardContent>
+                        <Typography > 
+                            Would You Like To Permanently Delete the {shoppingLists[selectedShoppingList].name} list ? 
+                        </Typography>
+                    </CardContent>
+                    <CardActions>
+                        <Button onClick = {(e) => {e.preventDefault(); setModal(false)}}>
+                            No 
+                        </Button>
+                        <Button onClick = {(e) => {e.preventDefault(); setShoppingListSelection(null); setModal(false); deleteList(selectedShoppingList, shoppingLists[selectedShoppingList].id)}}>
+                            Yes 
+                        </Button>
+                    </CardActions>
+                </Card>    
+            </Container>}
+        </Modal>:<div></div>
+    );
  
     const ShoppingListRows = shoppingLists?.map((list:any,index:number) => {
         return(
             <Grid item className={classes.shopping_list} xs={12} sm={6} lg={4}>
                 <Container>
+                    <Card style={{justifyContent: 'center', display : 'flex'}}>
+                    <CardContent style={{justifyContent: 'center'}}>
                     <Typography variant="h4" color = "primary" className = {classes.title}>
                         {list.name} {selectedShoppingList === list.id? '-' : ''}
                     </Typography>
+                    <ButtonGroup variant="contained" color="secondary" orientation="vertical"> 
                     <Button
-                        variant = "contained"
-                        color = "secondary"
                         startIcon = {<DetailsIcon />}
                         onClick = {(event) => {event.preventDefault(); setShoppingListSelection(list.id)}}>
                         See List Details 
                     </Button>
                     <Button
-                        className = {classes.btn}
-                        variant = "contained"
-                        color = "secondary"
                         startIcon = {<ShoppingCartIcon />}
                         onClick =  {() => history.push(`/group/${id}/shoppinglist/${list.id}`) }>
                         Visit Shopping List Page 
+                    </Button>
+                    <Button
+                        style = {{color : 'red', backgroundColor : 'orange'}}
+                        startIcon = {<DeleteIcon />}
+                        onClick = {(e) => {e.preventDefault(); setShoppingListSelection(index); setModal(true)}}>
+                        Delete List :  
                     </Button>
                     <IconButton 
                         color= "inherit"
                         onClick = {(e) => {e.preventDefault(); deleteList(index, list.id)}}
                     > <DeleteIcon /> </IconButton>
+                    </ButtonGroup>
+                    </CardContent>
+                    </Card> 
                 </Container>
             </Grid>
         );
     })
 
     return (
-        <Grid container>
+        <Grid container spacing = {2}>
+            {modal}
               <Grid item xl ={12} xs={12}>
                     <Button
                     onClick = {(e) => {e.preventDefault(); history.push('/')}}

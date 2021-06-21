@@ -1,4 +1,5 @@
 import React, {createContext, useReducer} from 'react';
+const axios = require('axios');
 
 type AuthType = {
     user : string|null;
@@ -6,9 +7,8 @@ type AuthType = {
 }
 
 export const initialState = {
-    user : JSON.parse(localStorage.getItem('user') as string),
-    //user: 'William',
-    token: JSON.parse(localStorage.getItem('token') as string)
+    user : JSON.parse(localStorage.getItem('user') as string) || null,
+    token: JSON.parse(localStorage.getItem('token') as string) || null
 }
 
 export const authreducer = (state:any,action:any) => {

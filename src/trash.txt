@@ -137,3 +137,91 @@
                         </div>
                     </div>
             </div>
+
+
+                /*useEffect(() => {
+        const FetchGroups = async () => {
+            axios.get(`${api_url}/group/group/mygroups`, {
+                headers: {
+                    Authorization : state.token
+                },
+            })
+            .then(response => setGroups(response.data))
+            .catch(err => console.log(err));
+        }
+        if(state.token) FetchGroups();
+        else return;
+    }, [state.token]);*/
+
+    useEffect(() => {
+        const FetchInvites = async () => {
+            axios.get(`${api_url}/group/invite/getmyinvites`, {
+                headers: {
+                    Authorization : state.token
+                },
+            })
+            .then(response => setInvites(response.data))
+            .catch(err => console.log(err));
+        }
+        if(state.token) FetchInvites();
+        else return;
+    }, [state.token]);
+
+            /*axios.get(`${api_url}/group/create`, {
+            params: {
+                name : groupname
+            },
+            headers : {
+                Authorization : state.token
+            }
+        }, 
+        )*/
+
+
+    /*const createItem = async (name:string, description:string) => {
+        if(category1 && category1 === category2) return setCategoryError('Enter Different or Only 1 Category');
+        console.log(category1);
+        if(itemName === null || itemName ==='' || itemName === undefined) return setNameError('Enter a Valid Name ')
+        if(itemDescription === null || itemDescription || '' || itemDescription === undefined) return setItemDescription('Enter a Valid Description')
+        try{
+            const response:any = await axios.get(`${me}/items/add/${listid}`, {
+                headers: {
+                    Authorization : state.token,
+                },
+                params : {
+                    name,
+                    description,
+                    category1,
+                    category2,
+                }
+            });
+            const item:Item= response.data[0];
+            setItems([...items,item])
+            console.log(items);
+        }
+        catch(err){
+            console.log(err);
+        }
+        //do something with Redux or local state here???
+    }*/
+
+            /*axios.get(`${me}/items/delete/${id}`, {
+            headers: {
+                Authorization: state.token,
+            },
+            params : {
+                id
+            }
+        })*/
+
+            const InviteList:any = invites?.map((invite:any, index:number) => {
+        return(
+            <div>
+                <Container key ={invite.id}>
+                    <Typography variant = "h6" align="center" color="primary"> {invite.name}</Typography>
+                    <Button onClick={(event) => acceptInvite(event, invite.group_id)} variant = "contained" color = "primary"> Accept Invite </Button>
+                    <Button onClick={(event) => acceptInvite(event, invite.group_id)} variant = "contained" color = "secondary"> Decline Invitation : </Button>
+                </Container>
+            </div>
+        );
+    })
