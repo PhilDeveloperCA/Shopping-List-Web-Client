@@ -22,6 +22,12 @@ type LocalLoginError = {
     email : null|string,
 }
 
+const useStyles = makeStyles((theme) => ({
+    root : {
+        flexGrow:1,
+    }
+}))
+
 const LoginScreen:React.FC = () => {
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
@@ -42,22 +48,22 @@ const LoginScreen:React.FC = () => {
             'Authorization' : state.token,
         }
     })
+
+    const classes = useStyles();
     
     const api_url = process.env.REACT_APP_API_URL;
 
-    const googleError = () => alert('Google Sign In was Unsuccessful')
-
-    const handleChange = (e:any, name:string) => {
-        setLocalLogin({...localLogin, [name] : e.target.value})
-    }
-
     async function Signup(e:any){
         e.preventDefault();
+        if(username !== confirmPassword){
+            return setLocalLoginError({...localLoginError, password:'Passwords Do Not Match'});
+        }
+
         client.post('/auth/local-signup', {
-            username : localLogin['username'],
-            password : localLogin['password'],
+            username,
+            password
         })
-                                                               .then(response => {
+        .then(response => {
             dispatch({
                 type: 'login',
                 payload: {
@@ -95,69 +101,114 @@ const LoginScreen:React.FC = () => {
     }
 
     return(
-<           Container>
-                <Typography
-                    variant = "h3"
-                >
-                    Login / Sign-Up Page 
-                </Typography>
+        <Grid container className={classes.root} spacing={2} direction="column" alignItems="center" justify="center">
+        <Grid item xs={12} style={{marginBottom:'30px', marginTop:'40px'}}>
+            <Typography variant = "h3"> Login / Sign-Up </Typography>
+        </Grid>
+        <Grid item style={{display:'flex', flexDirection:'row', alignItems:'space-around', justifyContent:'space-around'}}>
+            <div style={{flexGrow:1.0, marginRight:'30px'}}> 
+            <Button 
+                color="primary" 
+                variant="outlined" 
+                size = "large"
+                onClick= {(e) => {e.preventDefault(); setLogin(false)}} 
+                disabled={!login}> 
+                New User? Sign Up 
+            </Button>
+            </div>
+            <div style={{flexGrow:1.0, marginLeft:'30px'}}>
+            <Button 
+                size="large" 
+                color="primary" 
+                variant="outlined" 
+                onClick= {(e) => {e.preventDefault(); setLogin(true)}} 
+                disabled={login}> 
+                Returning ? Sign in 
+            </Button>
+            </div>
+        </Grid>
+        <Grid item>
+        <TextField 
+                label = "Enter Username"
+                variant = "outlined"
+                color = "primary"
+                required
+                error = {usernameError != null? true:false}
+                helperText={usernameError}
+                onChange ={(e) => {setUsername(e.target.value)}}
+            />
+        </Grid>
+        <Grid item>
+        <TextField 
+                label = "Enter Password"
+                variant = "outlined"
+                color = "primary"
+                required
+                type="password"
+                error = {localLoginError.password != null? true:false}
+                helperText={localLoginError.password}
+                onChange ={(e) => {setPassword(e.target.value)}}
+            />
+        </Grid> 
+        <Grid item>
+        {!login?<Grid item><TextField 
+            label = "Re-Enter Password"
+            variant = "outlined"
+            color = "primary"
+            type="password"
+            required
+            error = {localLoginError.password != null? true:false}
+            helperText={localLoginError.password}
+            onChange = {(e) => {setConfirmPassword(e.target.value)}}
+        /></Grid>:null}
+        </Grid>
+        <Grid item>
+            <Button 
+                size="large" 
+                color="primary" 
+                variant="contained" 
+                onClick = {login?Login:Signup}
+            > 
+                {login? 'Login': 'Sign-Up'}
+            </Button>
+        </Grid>
+        {/*<Grid item>
+        <form noValidate autoComplete="off"> 
+            <TextField 
+                label = "Enter Username"
+                variant = "outlined"
+                color = "primary"
+                required
+                error = {usernameError != null? true:false}
+                helperText={usernameError}
+                onChange ={(e) => {setUsername(e.target.value)}}
+            />
+            <TextField 
+                label = "Enter Password"
+                variant = "outlined"
+                color = "primary"
+                required
+                error = {passwordError != null? true:false}
+                helperText={passwordError}
+                onChange ={(e) => {setPassword(e.target.value)}}
+            />
+        
+        {!login?<TextField 
+            label = "Re-Enter Password"
+            variant = "outlined"
+            color = "primary"
+            required
+            error = {passwordError != null? true:false}
+            helperText={passwordError}
+            onChange = {(e) => {setConfirmPassword(e.target.value)}}
+        />:null}
+        </form>
+        </Grid>
+        <Container>
                 <GroupIcon fontSize = "large" color="secondary" />
-                <Button 
-                    color="primary" 
-                    variant="contained" 
-                    size = "large"
-                    onClick= {(e) => {e.preventDefault(); setLogin(false)}} 
-                    disabled={!login}> 
-                    New User? Sign Up 
-                </Button>
-                <Button 
-                    size="large" 
-                    color="primary" 
-                    variant="contained" 
-                    onClick= {(e) => {e.preventDefault(); setLogin(true)}} 
-                    disabled={login}> 
-                    Returning ? Sign in 
-                </Button>
-                <form noValidate autoComplete="off"> 
-                    <TextField 
-                        label = "Enter Username"
-                        variant = "outlined"
-                        color = "primary"
-                        required
-                        error = {usernameError != null? true:false}
-                        helperText={usernameError}
-                        onChange ={(e) => {setUsername(e.target.value)}}
-                    />
-                    <TextField 
-                        label = "Enter Password"
-                        variant = "outlined"
-                        color = "primary"
-                        required
-                        error = {passwordError != null? true:false}
-                        helperText={passwordError}
-                        onChange ={(e) => {setPassword(e.target.value)}}
-                    />
-                
-                {!login?<TextField 
-                    label = "Re-Enter Password"
-                    variant = "outlined"
-                    color = "primary"
-                    required
-                    error = {passwordError != null? true:false}
-                    helperText={passwordError}
-                    onChange = {(e) => {setConfirmPassword(e.target.value)}}
-                />:null}
-
-                <Button 
-                    size="large" 
-                    color="primary" 
-                    variant="contained" 
-                    onClick = {login?Login:Signup}
-                > 
-                    {login? 'Login': 'Sign-Up'}
-                </Button>
-                </form>
-            </Container>    
+            </Container>
+        */}
+        </Grid>    
     );
 }
 

@@ -96,7 +96,6 @@ const Layout:React.FC = ({children}) => {
     if(!state.token || !state.user){
         return(
             <React.Fragment>
-                <div> Not Logged In : </div>
                 <LoginScreen />
             </React.Fragment>
 

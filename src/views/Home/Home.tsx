@@ -145,14 +145,21 @@ const Home:React.FC = () => {
 
     const Signup = async (event:any) => {
         event.preventDefault();
-        if(username === '') return setUsernameError('Enter a Valid Username');
-        if(password === '') return setPasswordError('Enter a Valid Password')
+        console.log('here trying');
+        if(username === '' || username === null) return setUsernameError('Enter a Valid Username');
+        if(password === ''|| password === null) return setPasswordError('Enter a Valid Password')
         if(confirmPassword != password) return setPasswordError('Passwords Do Not Match');
+        console.log({username,password})
         axios.post(`${api_url}/auth/signup`,
             {
                 username,
                 password
-            }           
+            },
+            {
+                validateStatus: function(status){
+                    return status >= 200 && status < 300;
+                }
+            }          
         )
         .then(response => 
             dispatch({
