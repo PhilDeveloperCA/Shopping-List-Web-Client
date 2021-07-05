@@ -71,6 +71,7 @@ const Group:React.FC = () => {
                 name : shoppinglistname,
             }
         })
+        setShoppingListName('');
     }
 
     useEffect(() => {
@@ -108,6 +109,7 @@ const Group:React.FC = () => {
                 }
             })
             setShoppingLists([...shoppingLists, response.data[0]]);
+            setShoppingListName('');
             console.log(shoppingLists);
         }
         catch(err){
@@ -142,7 +144,8 @@ const Group:React.FC = () => {
     }
 
     const modal =  (
-        shoppingLists&&selectedShoppingList?<Modal open={showModal} onClose={() => {}} aria-labelledby='simple-modal-title' aria-describedby = 'simple-modal-description' style={{display : 'flex', alignItems : 'center', justifyContent:'center'}}> 
+        shoppingLists&&(selectedShoppingList+1)
+        ?<Modal open={showModal} onClose={() => {setModal(false)}} aria-labelledby='simple-modal-title' aria-describedby = 'simple-modal-description' style={{display : 'flex', alignItems : 'center', margin:'auto', alignContent:'center', maxWidth:'400px', justifyContent:'center'}}> 
             {<Container>
                 <Card>
                     <CardContent>
@@ -150,7 +153,7 @@ const Group:React.FC = () => {
                             Would You Like To Permanently Delete the {shoppingLists[selectedShoppingList].name} list ? 
                         </Typography>
                     </CardContent>
-                    <CardActions>
+                    <CardActions style={{display:'flex', justifyContent:'space-around'}}>
                         <Button onClick = {(e) => {e.preventDefault(); setModal(false)}}>
                             No 
                         </Button>
@@ -183,16 +186,16 @@ const Group:React.FC = () => {
                         onClick =  {() => history.push(`/group/${id}/shoppinglist/${list.id}`) }>
                         Visit Shopping List Page 
                     </Button>
-                    <Button
+                    {/*<Button
                         style = {{color : 'red', backgroundColor : 'orange'}}
                         startIcon = {<DeleteIcon />}
-                        onClick = {(e) => {e.preventDefault(); setShoppingListSelection(index); setModal(true)}}>
+                        onClick = {(e) => {e.preventDefault(); setShoppingListSelection(index); console.log(selectedShoppingList); console.log(shoppingLists); console.log(shoppingLists&&(selectedShoppingList+1)?true:false); setModal(true)}}>
                         Delete List :  
-                    </Button>
+                    </Button> */ null}
                     <IconButton 
                         color= "inherit"
-                        onClick = {(e) => {e.preventDefault(); deleteList(index, list.id)}}
-                    > <DeleteIcon /> </IconButton>
+                        onClick = {(e) => {e.preventDefault(); setShoppingListSelection(index); console.log(selectedShoppingList); console.log(shoppingLists); console.log(shoppingLists&&(selectedShoppingList+1)?true:false); setModal(true)}}>
+                    <DeleteIcon /> </IconButton>
                     </ButtonGroup>
                     </CardContent>
                     </Card> 

@@ -10,7 +10,7 @@ import DetailsIcon from '@material-ui/icons/Details';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Box from '@material-ui/core/Box';
 
-import {Typography, Button, Grid, ButtonGroup, Container, makeStyles, TextField, Card, Paper, CardContent, CardActions} from '@material-ui/core';
+import {Typography, Button, Grid, ButtonGroup, Container, makeStyles, TextField, Card,  Paper, CardContent, CardActions} from '@material-ui/core';
 
 const useStyles = makeStyles({
     btn : {
@@ -222,10 +222,10 @@ const Home:React.FC = () => {
     const GroupList:any = groups?.map((group:any,index:any) => {
         if(true){
             return(
-                <Grid item sm={9} md={6} lg={4} >
-                    <Card>
-                        <CardContent>
-                            <Typography> {group.name} </Typography>
+                <Grid item sm={9} md={6} lg={4}>
+                    <Card style={{minHeight:'250px', padding:'30px', alignItems:'center', backgroundColor:'whitesmoke', display:'flex', justifyContent:'flex-start', flexDirection:'column'}}>
+                        <CardContent >
+                            <Typography variant="h5"> {group.name} </Typography>
                         </CardContent>
                         <CardActions>
                             <ButtonGroup
@@ -372,7 +372,7 @@ const Home:React.FC = () => {
     else {
         return (
             <React.Fragment>
-                <Grid container>
+                <Grid container style={{margin:'30px'}}>
                     <Grid item md ={6} xs={12}>
                         <Typography
                             variant = "h4"
@@ -410,7 +410,7 @@ const Home:React.FC = () => {
                             Invites : 
                         </Typography>
                     </Grid>
-                    <Grid item lg={12} xs={12}>
+                    <Grid item lg={12} xs={12} style={{marginBottom:'50px'}}>
                         <Typography
                             variant = "h3"
                             color = "secondary"
