@@ -42,7 +42,7 @@ const LoginScreen:React.FC = () => {
     const {state, dispatch} = React.useContext(AuthContext);
 
     const client = axios.create({
-        baseURL : process.env.REACT_APP_API_URL,
+        baseURL : '/api',
         timeout : 1000,
         headers : {
             'Authorization' : state.token,
@@ -50,8 +50,6 @@ const LoginScreen:React.FC = () => {
     })
 
     const classes = useStyles();
-    
-    const api_url = process.env.REACT_APP_API_URL;
 
     async function Signup(e:any){
         e.preventDefault();
@@ -80,8 +78,6 @@ const LoginScreen:React.FC = () => {
     async function Login (e:any){
         e.preventDefault();
         client.post('/auth/signin',{
-            //username : localLogin['username'],
-            //password : localLogin['password'],
             username,
             password
         })
@@ -172,42 +168,6 @@ const LoginScreen:React.FC = () => {
                 {login? 'Login': 'Sign-Up'}
             </Button>
         </Grid>
-        {/*<Grid item>
-        <form noValidate autoComplete="off"> 
-            <TextField 
-                label = "Enter Username"
-                variant = "outlined"
-                color = "primary"
-                required
-                error = {usernameError != null? true:false}
-                helperText={usernameError}
-                onChange ={(e) => {setUsername(e.target.value)}}
-            />
-            <TextField 
-                label = "Enter Password"
-                variant = "outlined"
-                color = "primary"
-                required
-                error = {passwordError != null? true:false}
-                helperText={passwordError}
-                onChange ={(e) => {setPassword(e.target.value)}}
-            />
-        
-        {!login?<TextField 
-            label = "Re-Enter Password"
-            variant = "outlined"
-            color = "primary"
-            required
-            error = {passwordError != null? true:false}
-            helperText={passwordError}
-            onChange = {(e) => {setConfirmPassword(e.target.value)}}
-        />:null}
-        </form>
-        </Grid>
-        <Container>
-                <GroupIcon fontSize = "large" color="secondary" />
-            </Container>
-        */}
         </Grid>    
     );
 }

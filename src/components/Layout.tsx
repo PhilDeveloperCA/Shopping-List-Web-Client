@@ -56,11 +56,9 @@ const Layout:React.FC = ({children}) => {
     const history = useHistory();
     const classes = useStyles();
 
-    const api_url = process.env.REACT_APP_API_URL;
-
     useEffect(() => {
         const FetchInvites = async () => {
-            axios.get(`${api_url}/group/invite/getmyinvites`, {
+            axios.get(`api/invite`, {
                 headers: {
                     Authorization : state.token
                 },
@@ -90,9 +88,6 @@ const Layout:React.FC = ({children}) => {
         </Button>
     );
 
-    //{LoginScreen}
-    //add Invite Logic to AppBar
-
     if(!state.token || !state.user){
         return(
             <React.Fragment>
@@ -104,10 +99,19 @@ const Layout:React.FC = ({children}) => {
 
     const acceptInvite = (event:any,id:number) => {
         event.preventDefault();
-        axios.get(`${api_url}/group/invite/accept/${id}`, {
+        axios.get(`api/invite/${id}`, {
             headers:{
                 Authorization: state.token,
             },
+        })
+    }
+
+    const declineInvite = (event:any, id:number) => {
+        event.preventDefault();
+        axios.delete(`api/invite/${id}`, {
+            headers: {
+                Authorization : state.token,
+            }
         })
     }
 
@@ -125,7 +129,7 @@ const Layout:React.FC = ({children}) => {
                 <Container key ={invite.id}>
                     <Typography variant = "h6" align="center" color="primary"> {invite.name}</Typography>
                     <Button onClick={(event) => acceptInvite(event, invite.group_id)} variant = "contained" color = "primary"> Accept Invite </Button>
-                    <Button onClick={(event) => acceptInvite(event, invite.group_id)} variant = "contained" color = "secondary"> Decline Invitation : </Button>
+                    <Button onClick={(event) => declineInvite(event, invite.group_id)} variant = "contained" color = "secondary"> Decline Invitation : </Button>
                 </Container>
             </div>
         );
@@ -158,9 +162,6 @@ const Layout:React.FC = ({children}) => {
             </MenuItem>
         </Menu>
     );
-
-
-    //{!state.user || !state.token?null:LogoutButton}
     
     return(
         <div className={classes.grow}>

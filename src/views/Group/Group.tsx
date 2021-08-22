@@ -47,11 +47,7 @@ const Group:React.FC = () => {
     const {state, dispatch} = React.useContext(AuthContext);
 
     let history = useHistory();
-    let match = useRouteMatch();
-    let location = useLocation();
     const {id} = useParams<{id:string|undefined}>();
-
-    let me = process.env.REACT_APP_API_URL;
 
     const handleShoppinglistNameChange = (name:string) => {
         if(name != undefined){
@@ -59,31 +55,16 @@ const Group:React.FC = () => {
         }
     }
 
-    const createShoppingList = async (event:any) => {
-        event.preventDefault();
-        console.log(shoppinglistname);
-        if(shoppinglistname === '' || shoppinglistname === null) return setListNameError('Enter a Valid Name');
-        else await axios.get(`${me}/lists/create/${id}`, {
-            headers : {
-                Authorization : state.token
-            },
-            params : {
-                name : shoppinglistname,
-            }
-        })
-        setShoppingListName('');
-    }
-
     useEffect(() => {
         const FetchShoppingLists = async () => {
             if(true){
-                const response = await axios.get(`${me}/lists/get/${id}`, {
+                const response = await axios.get(`/api/lists/?group=${id}`, {
                     headers : {
                         Authorization : state.token,
                     },
                 })
                 setShoppingLists(response.data);
-                const responseUsers = await axios.get(`${me}/group/users/${id}`, {
+                const responseUsers = await axios.get(`/api/users?group=${id}`, {
                     headers: {
                         Authorization : state.token
                     }
@@ -100,14 +81,14 @@ const Group:React.FC = () => {
         console.log(shoppinglistname);
         if(shoppinglistname === '' || shoppinglistname ===  undefined) return setListNameError('Enter a Valid Name');
         try{
-            const response = await axios.get(`${me}/lists/create/${id}`,{
-                headers: {
-                    Authorization : state.token,
-                },
-                params : {
-                    name: shoppinglistname
-                }
-            })
+            const response = await axios.post(`/api/lists/${id}`, 
+            {
+                name:shoppinglistname
+            }, 
+            {
+                headers: {Authorization : state.token}
+            }
+            )
             setShoppingLists([...shoppingLists, response.data[0]]);
             setShoppingListName('');
             console.log(shoppingLists);
@@ -118,25 +99,32 @@ const Group:React.FC = () => {
     }
 
     const deleteList = async (index:number, shoppingListId:number) => {
-        await axios.get(`${me}/lists/delete/${shoppingListId}`,{
+        axios.delete(`/api/lists/${shoppingListId}`,{
             headers: {
                 Authorization: state.token
             }
-        });
-        setShoppingLists([...shoppingLists.slice(0,index),...shoppingLists.slice(index+1)]);
+        })
+        .then(res => {
+            setShoppingListSelection(undefined);
+            setShoppingLists([...shoppingLists.slice(0,index),...shoppingLists.slice(index+1)]);
+        }).catch(err => {
+            console.log(err);
+        }) 
     }
 
     const inviteUser = async () => {
         if(inviteUsername === undefined || inviteUsername === null || inviteUsername === '') return setNameError('Enter a Valid Username')
-        axios.get(`${me}/group/invite/send/${id}`,{
-            params : {
-                username : inviteUsername,
-            },
+        axios.post(`/api/invite`,{
+            username: inviteUsername,
+            groupid : id
+        },
+        {
             headers : {
                 Authorization: state.token
             }
-        })
-        .then(response => console.log(response))
+            }
+        )
+        .then(response => setNameError(null))
         .catch(err => {
             console.log(err);
             setNameError('User Does Not Exist, Enter a Valid Name');
@@ -150,7 +138,7 @@ const Group:React.FC = () => {
                 <Card>
                     <CardContent>
                         <Typography > 
-                            Would You Like To Permanently Delete the {shoppingLists[selectedShoppingList].name} list ? 
+                            {shoppingLists[selectedShoppingList]? `Would You Like To Permanently Delete the ${shoppingLists[selectedShoppingList].name} list ?`:null }
                         </Typography>
                     </CardContent>
                     <CardActions style={{display:'flex', justifyContent:'space-around'}}>
@@ -186,12 +174,6 @@ const Group:React.FC = () => {
                         onClick =  {() => history.push(`/group/${id}/shoppinglist/${list.id}`) }>
                         Visit Shopping List Page 
                     </Button>
-                    {/*<Button
-                        style = {{color : 'red', backgroundColor : 'orange'}}
-                        startIcon = {<DeleteIcon />}
-                        onClick = {(e) => {e.preventDefault(); setShoppingListSelection(index); console.log(selectedShoppingList); console.log(shoppingLists); console.log(shoppingLists&&(selectedShoppingList+1)?true:false); setModal(true)}}>
-                        Delete List :  
-                    </Button> */ null}
                     <IconButton 
                         color= "inherit"
                         onClick = {(e) => {e.preventDefault(); setShoppingListSelection(index); console.log(selectedShoppingList); console.log(shoppingLists); console.log(shoppingLists&&(selectedShoppingList+1)?true:false); setModal(true)}}>
@@ -213,7 +195,7 @@ const Group:React.FC = () => {
                     startIcon = {<ArrowBackIcon />}
                     className = {classes.btn2}
                     >
-                        Back to Group 
+                        Back to Home 
                     </Button>
                 </Grid>
             <Grid item sm={12} md={6}>
@@ -232,6 +214,12 @@ const Group:React.FC = () => {
                     <Button onClick={(event) => {event.preventDefault(); inviteUser()}} color = "primary">
                         Invite User 
                     </Button>
+                </Container>
+                <Container>
+                    <div>
+                        <h1> Current Users: </h1>
+                        {users.map((user,index) => <h1> {user.username} </h1>)}
+                    </div>
                 </Container>
             </Grid>
             <Grid item sm={12} md={6} justify='center'>

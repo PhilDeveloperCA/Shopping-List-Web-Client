@@ -25,7 +25,6 @@ const theme = createMuiTheme({
 })
 
 const App = () => {;
-    console.log(process.env.REACT_APP_API_URL);
     const [state,dispatch] = React.useReducer(authreducer, initialState);
     const value = {state, dispatch}
     return (
