@@ -53,11 +53,15 @@ const LoginScreen:React.FC = () => {
 
     async function Signup(e:any){
         e.preventDefault();
-        if(username !== confirmPassword){
+        if(password !== confirmPassword){
             return setLocalLoginError({...localLoginError, password:'Passwords Do Not Match'});
         }
 
-        client.post('/auth/local-signup', {
+        if(password.length < 7){
+            return setLocalLoginError({...localLoginError, password:"Password Must Be At Least 7 Characters"});
+        }
+
+        axios.post('/api/auth/local-signup', {
             username,
             password
         })
@@ -65,7 +69,7 @@ const LoginScreen:React.FC = () => {
             dispatch({
                 type: 'login',
                 payload: {
-                    user: response.data.username,
+                    user: response.data.user.username,
                     token:response.data.jwt,
                 }
             })
@@ -77,7 +81,7 @@ const LoginScreen:React.FC = () => {
 
     async function Login (e:any){
         e.preventDefault();
-        client.post('/auth/signin',{
+        axios.post('/api/auth/signin',{
             username,
             password
         })
