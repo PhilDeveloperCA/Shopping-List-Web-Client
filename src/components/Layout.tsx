@@ -52,6 +52,7 @@ const Layout:React.FC = ({children}) => {
     const [activePopup, setActivePopup] = useState<boolean>(false);
     const [invites, setInvites] = useState<any>();
 
+    //Force a Login To CHange 
  
     const history = useHistory();
     const classes = useStyles();
@@ -78,6 +79,8 @@ const Layout:React.FC = ({children}) => {
         history.push('/');
     }
 
+
+
     const LogoutButton = (
         <Button 
             onClick = {Logout}
@@ -93,7 +96,6 @@ const Layout:React.FC = ({children}) => {
             <React.Fragment>
                 <LoginScreen />
             </React.Fragment>
-
         );
     }
 

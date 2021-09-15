@@ -9,6 +9,7 @@ import GroupIcon from '@material-ui/icons/Group';
 import DetailsIcon from '@material-ui/icons/Details';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Box from '@material-ui/core/Box';
+import retryRefresh from '../../util/retryRefresh';
 
 import {Typography, Button, Grid, ButtonGroup, Container, makeStyles, TextField, Card,  Paper, CardContent, CardActions} from '@material-ui/core';
 import { groupEnd } from 'node:console';
@@ -57,6 +58,19 @@ const Home:React.FC = () => {
     const {state, dispatch} = React.useContext(AuthContext);
     const history = useHistory();
 
+    const handleAuthFailure = {
+        success: (response:any) => dispatch({
+            type: 'login',
+            payload: {
+                user: response.username,
+                token:response.jwt,
+            }
+        }),
+        failure : (respone:any) => dispatch({
+            type:'logout'
+        })
+    }
+
     const instance = axios.create({
         baseURL : '/api',
         timeout : 1000,
@@ -76,10 +90,9 @@ const Home:React.FC = () => {
                     setGroups(response.data);
                 })
                 .catch(err => {
-                    console.log(err);
-                    /*dispatch({
-                        type: 'logout'
-                    })*/
+                   retryRefresh()
+                   .then(res => handleAuthFailure.success)
+                   .catch(err => handleAuthFailure.failure)
                 })
         }
         if(state.token) FetchGroups();
@@ -104,7 +117,11 @@ const Home:React.FC = () => {
             name: groupname,
         })
         .then(response =>{setGroups([...groups, {...response.data[0], admin:state.user}]); setGroupName("")})
-        .catch(err => console.log(err));
+        .catch(err => {
+            retryRefresh()
+            .then(res => handleAuthFailure.success)
+            .catch(err => handleAuthFailure.failure)
+         })
     }
 
     const handleGroupSelection = async (id:any, index:number) => {
@@ -118,7 +135,11 @@ const Home:React.FC = () => {
             .then(response => {
                 setGroups([...groups.slice(0,index), ...groups.slice(index+1)]);
             })
-            .catch(err => console.log(err));
+            .catch(err => {
+                retryRefresh()
+                .then(res => handleAuthFailure.success)
+                .catch(err => handleAuthFailure.failure)
+             })
     }
 
     const GroupList:any = groups?.map((group:any,index:any) => {
@@ -180,6 +201,7 @@ const Home:React.FC = () => {
                             label = "Add Group"
                             variant = "outlined"
                             color = "secondary"
+                            id="Add Group"
                             required
                             onChange = {(e) => setGroupName(e.target.value)}
                             error = {true?false:true}

@@ -56,7 +56,9 @@ const LoginScreen:React.FC = () => {
         if(password !== confirmPassword){
             return setLocalLoginError({...localLoginError, password:'Passwords Do Not Match'});
         }
-
+        if(username.length<6){
+            return setLocalLoginError({...localLoginError, username:"Username Must Be At Least 6 Characters"});
+        }
         if(password.length < 7){
             return setLocalLoginError({...localLoginError, password:"Password Must Be At Least 7 Characters"});
         }
@@ -76,6 +78,7 @@ const LoginScreen:React.FC = () => {
         })
         .catch(err => {
             console.log(err);
+            return setLocalLoginError({...localLoginError, })
         })
     }
 

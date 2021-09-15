@@ -1,0 +1,9 @@
+FROM node:alpine3.14 as builder
+COPY ./[^node_modules]* ./
+RUN npm install
+RUN npm build
+
+FROM nginx as final
+EXPOSE 443 80
+COPY --from=builder ./build ./
+CMD ["nginx", "-g", "daemon off;"]

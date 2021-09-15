@@ -26,3 +26,4 @@ yarn-error.log*
 package_lock.json
 .src/views/Home2.tsx
 src/views/.Home.tsx.swp
+./src/__tests__

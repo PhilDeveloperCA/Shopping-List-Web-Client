@@ -6,8 +6,10 @@ import { AuthContext } from '../../auth_context';
 import {Button} from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack'
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import {Grid, Container, IconButton, Typography, makeStyles, Table, TableBody, TableContainer, TableHead, TableRow, TableCell, TablePagination, TableSortLabel, Toolbar, Checkbox, TextField} from '@material-ui/core';
-
+import { reccomendationList } from '../Home/calculateDropdown';
+import { tryNetWorkFetch } from '../../util/retryRefresh';
 
 interface FormProps {
     handleSubmit : Function,
@@ -37,12 +39,15 @@ const ItemForm : React.FC<FormProps> = ({handleSubmit, ErrorState}) => {
     return(
         <React.Fragment>
         <Container>
+            <div style={{display:'flex', flexDirection:'column', alignItems:'center',justifyContent:'center', width:'800px'}}>
+                <div style={{ justifyContent:'center', alignSelf:"center"}}>
                 <Typography
                     variant = "h5"
                 >
                     Add Items : 
                 </Typography>
-                <form noValidate autoComplete="off">
+                </div>
+                <form noValidate autoComplete="off" style={{width:'700px', alignSelf:'center', flexDirection:'column', display:'flex', alignItems:'center'}}>
                     <TextField 
                     label = "Item Name "
                     onBlur= {(e)=> handleChange(e, 'name')}
@@ -65,38 +70,58 @@ const ItemForm : React.FC<FormProps> = ({handleSubmit, ErrorState}) => {
                     helperText = {ErrorState.descriptionError}
                     />
                 </form>
-                <form autoComplete="off" noValidate>
-                <TextField                     
-                    label = "1st Category"
-                    onBlur= {(e) => {
-                        if(e.target.value != undefined){
-                            handleChange(e, 'category1');
-                        }
-                    }}
-                    variant = "outlined"
-                    color = "secondary"
+                <form autoComplete="off" noValidate style={{width:'200px'}}>
+                <Autocomplete
+                    id="free-solo-demo"
+                    freeSolo
+                    options={reccomendationList}
+                    renderInput={(params) => (
+                        <TextField    
+                        {...params}                 
+                        label = "1st Category"
+                        onBlur= {(e) => {
+                            if(e.target.value != undefined){
+                                handleChange(e, 'category1');
+                            }
+                        }}
+                        variant = "outlined"
+                        color = "secondary"
+                        />
+                    )}
+                /> 
+                                <Autocomplete
+                    id="free-solo-demo"
+                    freeSolo
+                    options={reccomendationList}
+                    renderInput={(params) => (
+                        <TextField          
+                        {...params}           
+                        label = "2nd Category "
+                        onBlur= {(e) => {
+                            if(e.target.value != undefined){
+                                handleChange(e, 'category2');
+                            }
+                        }}
+                        variant = "outlined"
+                        color = "secondary"
+                        error = {ErrorState.categoryError === null?false:true}
+                        helperText = {ErrorState.categoryError}
                     />
-                <TextField                     
-                    label = "2nd Category "
-                    onBlur= {(e) => {
-                        if(e.target.value != undefined){
-                            handleChange(e, 'category2');
-                        }
-                    }}
-                    variant = "outlined"
-                    color = "secondary"
-                    error = {ErrorState.categoryError === null?false:true}
-                    helperText = {ErrorState.categoryError}
-                />
+                    )}
+                /> 
+                  
                 </form>
                 <Button
                     variant = "outlined"
                     color = "secondary"
                     onClick = {(e) => {handleSubmit(e, item)}}
+                    style={{width:'100px'}}
                 >
                     Add Item : 
                 </Button>
+                </div>
         </Container>
+
         </React.Fragment>
     );
 }
